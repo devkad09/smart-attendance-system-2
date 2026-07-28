@@ -53,12 +53,12 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Today's Overview</h1>
-          <p className="text-sm text-muted-foreground mt-1">Live metrics auto-updating every 10 seconds</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Today's Overview</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Live metrics auto-updating every 10 seconds</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <span className="relative flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-success"></span>
@@ -68,7 +68,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <StatCard title="Total Enrolled" value={stats?.totalStudents ?? 0} icon={Users} color="text-primary" />
         <StatCard title="Present" value={stats?.present ?? 0} icon={UserCheck} color="text-success" />
         <StatCard title="Absent" value={stats?.absent ?? 0} icon={UserX} color="text-destructive" />

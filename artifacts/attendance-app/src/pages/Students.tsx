@@ -231,20 +231,20 @@ export default function Students() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Student Directory</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage enrolled students and credentials</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Student Directory</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Manage enrolled students and credentials</p>
         </div>
         
         <Dialog open={isEnrollOpen} onOpenChange={setIsEnrollOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2 self-start sm:self-auto">
               <UserPlus className="w-4 h-4" />
               Enroll Student
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle>Enroll New Student</DialogTitle>
               <DialogDescription>
@@ -260,7 +260,7 @@ export default function Students() {
                     <FormItem>
                       <FormLabel>Student ID</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. S-2024-001" {...field} />
+                        <Input placeholder="STU-001" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -273,7 +273,7 @@ export default function Students() {
                     <FormItem>
                       <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Jane Doe" {...field} />
+                        <Input placeholder="Alex Johnson" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

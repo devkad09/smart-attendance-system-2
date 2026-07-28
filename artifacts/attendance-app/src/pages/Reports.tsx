@@ -292,8 +292,8 @@ export default function Reports() {
 
       {/* Reports Table */}
       <Card className="border shadow-sm">
-        <CardContent className="p-0">
-          <Table>
+        <CardContent className="p-0 overflow-x-auto">
+          <Table className="min-w-[600px] sm:min-w-full">
             <TableHeader className="bg-muted/30">
               <TableRow>
                 <TableHead>Student Name</TableHead>

@@ -247,7 +247,7 @@ function FaceIdSection() {
         </div>
       )}
 
-      <CardContent className="p-8 flex flex-col items-center space-y-6">
+      <CardContent className="p-4 sm:p-8 flex flex-col items-center space-y-4 sm:space-y-6">
 
         {/* Live Camera Viewport */}
         {isCameraActive && (
@@ -267,8 +267,8 @@ function FaceIdSection() {
               <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-primary" />
               <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-primary" />
               
-              <div className={`w-36 h-36 rounded-full border-2 border-dashed ${faceState === "working" ? "border-primary animate-spin" : "border-primary/60 animate-pulse"} flex items-center justify-center`}>
-                <ScanFace className="w-12 h-12 text-primary/80" />
+              <div className={`w-28 h-28 sm:w-36 sm:h-36 rounded-full border-2 border-dashed ${faceState === "working" ? "border-primary animate-spin" : "border-primary/60 animate-pulse"} flex items-center justify-center`}>
+                <ScanFace className="w-10 h-10 sm:w-12 sm:h-12 text-primary/80" />
               </div>
             </div>
 
@@ -330,7 +330,7 @@ function FaceIdSection() {
           onClick={mode === "scan" ? handleFaceIdScan : handleRegister}
           disabled={mode === "scan" ? !canScan : !canRegister}
           className={`
-            relative group rounded-full p-10 transition-all duration-500 ease-out
+            relative group rounded-full p-6 sm:p-10 transition-all duration-500 ease-out
             ring-4 ring-offset-8 ring-offset-background outline-none
             ${faceRing[faceState]}
             ${(canScan || canRegister) ? "cursor-pointer active:scale-95" : "opacity-40 cursor-not-allowed"}
