@@ -16,6 +16,7 @@
   "devDependencies": {
     "@esbuild/darwin-x64": "^0.28.1",
     "@rollup/rollup-darwin-x64": "^4.62.3",
+    "@vercel/node": "^5.9.0",
     "prettier": "^3.9.5",
     "typescript": "~5.9.3"
   }

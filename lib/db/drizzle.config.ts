@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 
 const envPath = path.resolve(__dirname, "../../artifacts/api-server/.env");
-if (fs.existsSync(envPath) && typeof process.loadEnvFile === "function") {
+if (!process.env.DATABASE_URL && fs.existsSync(envPath) && typeof process.loadEnvFile === "function") {
   process.loadEnvFile(envPath);
 }
 

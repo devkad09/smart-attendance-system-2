@@ -38,6 +38,25 @@ function getRpContext(req: any) {
     try { refererOrigin = new URL(req.headers.referer).origin; } catch {}
   }
 
+  const hostHeader = req.get("host");
+  let hostOrigin: string | undefined;
+  let rpID = process.env.RP_ID || "localhost";
+
+  if (hostHeader) {
+    const hostWithoutPort = hostHeader.split(":")[0];
+    if (hostWithoutPort !== "localhost" && hostWithoutPort !== "127.0.0.1") {
+      rpID = hostWithoutPort;
+      const proto = req.get("x-forwarded-proto") || "https";
+      hostOrigin = `${proto}://${hostHeader}`;
+    }
+  }
+
+  if (requestOrigin && !requestOrigin.includes("localhost")) {
+    try { rpID = new URL(requestOrigin).hostname; } catch {}
+  } else if (refererOrigin && !refererOrigin.includes("localhost")) {
+    try { rpID = new URL(refererOrigin).hostname; } catch {}
+  }
+
   const origins = Array.from(new Set([
     "http://localhost:5173",
     "http://localhost:5174",
@@ -51,9 +70,10 @@ function getRpContext(req: any) {
     "http://127.0.0.1:5001",
     ...(requestOrigin ? [requestOrigin] : []),
     ...(refererOrigin ? [refererOrigin] : []),
+    ...(hostOrigin ? [hostOrigin] : []),
   ]));
 
-  return { origins, rpID: "localhost" };
+  return { origins, rpID };
 }
 
 function todayString() {
