@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router } from "express";
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
@@ -18,7 +18,7 @@ import {
   ListFaceIdCredentialsParams,
 } from "@workspace/api-zod";
 
-const router: IRouter = Router();
+const router = Router();
 
 // ── Challenge store (in-memory, TTL 5 min) ──────────────────────────────────
 const challenges = new Map<string, { challenge: string; expiresAt: number }>();

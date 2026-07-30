@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router } from "express";
 import { eq, and, gte, lte, sql } from "drizzle-orm";
 import { db, studentsTable, attendanceTable } from "@workspace/db";
 import {
@@ -8,7 +8,7 @@ import {
   GetAttendanceByClassQueryParams,
 } from "@workspace/api-zod";
 
-const router: IRouter = Router();
+const router = Router();
 
 function todayDateString(): string {
   return new Date().toISOString().slice(0, 10);

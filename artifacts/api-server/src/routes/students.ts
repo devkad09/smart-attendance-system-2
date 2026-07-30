@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router } from "express";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { db, studentsTable } from "@workspace/db";
@@ -8,7 +8,7 @@ import {
   DeleteStudentParams,
 } from "@workspace/api-zod";
 
-const router: IRouter = Router();
+const router = Router();
 
 function simulateFingerprintCapture(): string {
   return crypto.randomBytes(16).toString("hex");
