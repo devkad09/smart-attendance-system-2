@@ -19,6 +19,18 @@ const STORAGE_KEY = "smart_access_lecturer_user";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+async function parseResponse(res: Response): Promise<any> {
+  const text = await res.text();
+  if (!text || text.trim() === "") {
+    return {};
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { error: text.slice(0, 150) || `HTTP ${res.status} ${res.statusText}` };
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<LecturerUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -37,15 +49,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async ({ email, password }: { email: string; password: string }) => {
-    const res = await fetch(`${import.meta.env.BASE_URL}api/auth/login`, {
+    const baseUrl = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "");
+    const res = await fetch(`${baseUrl}/api/auth/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json();
+    const data = await parseResponse(res);
     if (!res.ok) {
-      throw new Error(data.error || "Login failed");
+      throw new Error(data.error || `Login failed (${res.status})`);
     }
 
     const lecturer: LecturerUser = data;
@@ -64,15 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     department: string;
     password: string;
   }) => {
-    const res = await fetch(`${import.meta.env.BASE_URL}api/auth/signup`, {
+    const baseUrl = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "");
+    const res = await fetch(`${baseUrl}/api/auth/signup`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ name, email, department, password }),
     });
 
-    const data = await res.json();
+    const data = await parseResponse(res);
     if (!res.ok) {
-      throw new Error(data.error || "Signup failed");
+      throw new Error(data.error || `Signup failed (${res.status})`);
     }
 
     const lecturer: LecturerUser = data;
@@ -83,7 +97,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
-    fetch(`${import.meta.env.BASE_URL}api/auth/logout`, { method: "POST" }).catch(() => {});
+    const baseUrl = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "");
+    fetch(`${baseUrl}/api/auth/logout`, { method: "POST" }).catch(() => {});
   };
 
   return (
