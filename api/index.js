@@ -1,6 +1,15 @@
-import app from "../artifacts/api-server/dist/app.mjs";
+let appPromise = null;
 
-export default function handler(req, res) {
+async function getApp() {
+  if (!appPromise) {
+    appPromise = import("../artifacts/api-server/dist/app.mjs").then(
+      (m) => m.default || m
+    );
+  }
+  return appPromise;
+}
+
+export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
@@ -23,5 +32,11 @@ export default function handler(req, res) {
     }
   }
 
-  return app(req, res);
+  try {
+    const app = await getApp();
+    return app(req, res);
+  } catch (err) {
+    console.error("Failed to load serverless app handler:", err);
+    return res.status(500).json({ error: "Internal Server Error", message: String(err) });
+  }
 }
