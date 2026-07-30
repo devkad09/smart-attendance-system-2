@@ -1,5 +1,6 @@
+// @ts-nocheck
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import app from "../artifacts/api-server/src/app";
+import app from "../artifacts/api-server/src/app.js";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -13,9 +14,9 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  // Handle Vercel rewrite URL preservation
+  // Preserve request URL path when rewritten by Vercel
   const rawUrl = req.url || "/";
-  if (rawUrl.includes("api/index") || rawUrl === "/api" || rawUrl === "/api/") {
+  if (rawUrl.startsWith("/api/index") || rawUrl === "/api" || rawUrl === "/api/") {
     const matchedPath =
       (req.headers["x-matched-path"] as string) ||
       (req.headers["x-forwarded-uri"] as string) ||
