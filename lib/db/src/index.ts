@@ -105,17 +105,25 @@ function createInMemoryDb() {
         const queryObj: any = {
           where: (condition: any) => {
             let filtered = [...items];
-            if (condition && condition.op) {
-              if (condition.op === "eq") {
-                const colName = condition.colName;
-                const val = condition.val;
-                filtered = filtered.filter((item) => (item as any)[colName] === val);
-              } else if (condition.op === "and") {
-                for (const sub of condition.subs) {
-                  if (sub.op === "eq") {
-                    filtered = filtered.filter((item) => (item as any)[sub.colName] === sub.val);
-                  }
+            if (condition) {
+              let colName = condition.colName;
+              let val = condition.val;
+
+              if (!colName && condition.queryChunks) {
+                for (const chunk of condition.queryChunks) {
+                  if (chunk && typeof chunk === "object" && "name" in chunk) colName = chunk.name;
+                  if (chunk && typeof chunk === "object" && "value" in chunk && chunk.value !== undefined) val = chunk.value;
                 }
+              }
+              if (!colName && condition.config) {
+                colName = condition.config.left?.name || condition.config.colName;
+                val = condition.config.right?.value !== undefined ? condition.config.right.value : condition.config.val;
+              }
+
+              if (colName && val !== undefined) {
+                filtered = filtered.filter((item) => String((item as any)[colName] || "").toLowerCase() === String(val).toLowerCase());
+              } else if (condition.op === "eq") {
+                filtered = filtered.filter((item) => (item as any)[condition.colName] === condition.val);
               }
             }
             const resObj: any = filtered;
