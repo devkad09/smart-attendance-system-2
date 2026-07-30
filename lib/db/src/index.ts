@@ -222,16 +222,18 @@ function createInMemoryDb() {
 let activePool: any = null;
 let activeDb: any = null;
 
-if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith("postgres")) {
+const isLocalhostDb = process.env.DATABASE_URL && (process.env.DATABASE_URL.includes("localhost") || process.env.DATABASE_URL.includes("127.0.0.1"));
+
+if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith("postgres") && (!process.env.VERCEL || !isLocalhostDb)) {
   try {
-    activePool = new Pool({ connectionString: process.env.DATABASE_URL });
+    activePool = new Pool({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 3000 });
     activeDb = drizzle(activePool, { schema });
   } catch (e) {
     console.warn("[Database] Could not connect to PostgreSQL. Using in-memory fallback store.", e);
     activeDb = createInMemoryDb();
   }
 } else {
-  console.log("[Database] DATABASE_URL not set or not postgres. Using in-memory fallback store.");
+  console.log("[Database] Using in-memory fallback store for serverless environment.");
   activeDb = createInMemoryDb();
 }
 
