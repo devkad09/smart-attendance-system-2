@@ -129,8 +129,8 @@ router.post("/webauthn/register-options", async (req, res): Promise<void> => {
       transports: (c.transports ?? []) as any,
     })),
     authenticatorSelection: {
-      authenticatorAttachment: "platform", // Face ID / Touch ID only
-      userVerification: "required",
+      authenticatorAttachment: "platform", // Face ID / Touch ID / Device lock
+      userVerification: "preferred",
     },
   });
 
@@ -159,7 +159,7 @@ router.post("/webauthn/register", async (req, res): Promise<void> => {
       expectedChallenge: stored.challenge,
       expectedOrigin: origins,
       expectedRPID: rpID,
-      requireUserVerification: true,
+      requireUserVerification: false,
     });
   } catch (e: any) {
     console.error("[WebAuthn Register Error]:", e);
@@ -245,7 +245,7 @@ router.post("/webauthn/auth", async (req, res): Promise<void> => {
       expectedChallenge: stored.challenge,
       expectedOrigin: origins,
       expectedRPID: rpID,
-      requireUserVerification: true,
+      requireUserVerification: false,
       credential: {
         id: storedCred.credentialId, // Base64URLString in v13
         publicKey: Buffer.from(storedCred.publicKey, "base64url") as unknown as Uint8Array<ArrayBuffer>,
