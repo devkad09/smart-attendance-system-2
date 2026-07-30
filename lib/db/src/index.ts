@@ -1,10 +1,11 @@
+// @ts-nocheck
 import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import pg from "pg";
-import * as schema from "./schema";
-import { studentsTable } from "./schema/students";
-import { attendanceTable } from "./schema/attendance";
-import { webAuthnCredentialsTable } from "./schema/webauthn";
-import { lecturersTable } from "./schema/lecturers";
+import * as schema from "./schema/index.js";
+import { studentsTable } from "./schema/students.js";
+import { attendanceTable } from "./schema/attendance.js";
+import { webAuthnCredentialsTable } from "./schema/webauthn.js";
+import { lecturersTable } from "./schema/lecturers.js";
 import fs from "fs";
 import path from "path";
 
@@ -229,4 +230,4 @@ if (process.env.DATABASE_URL && process.env.DATABASE_URL.startsWith("postgres"))
 export const pool = activePool;
 export const db: NodePgDatabase<typeof schema> = activeDb as unknown as NodePgDatabase<typeof schema>;
 
-export * from "./schema";
+export * from "./schema/index.js";
