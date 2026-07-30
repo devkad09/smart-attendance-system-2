@@ -29,8 +29,7 @@ function validateLogin(body: any): { valid: true; data: { email: string; passwor
   return { valid: true, data: { email: email.trim(), password } };
 }
 
-// POST /auth/signup
-router.post("/auth/signup", async (req, res): Promise<void> => {
+const handleSignup = async (req: any, res: any): Promise<void> => {
   const result = validateSignup(req.body);
   if (!result.valid) {
     res.status(400).json({ error: result.error });
@@ -72,10 +71,9 @@ router.post("/auth/signup", async (req, res): Promise<void> => {
     console.error("[Auth Signup Error]:", err);
     res.status(500).json({ error: "Failed to create lecturer account." });
   }
-});
+};
 
-// POST /auth/login
-router.post("/auth/login", async (req, res): Promise<void> => {
+const handleLogin = async (req: any, res: any): Promise<void> => {
   const result = validateLogin(req.body);
   if (!result.valid) {
     res.status(400).json({ error: result.error });
@@ -106,16 +104,18 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     console.error("[Auth Login Error]:", err);
     res.status(500).json({ error: "Login failed due to a server error." });
   }
-});
+};
 
-// GET /auth/me
-router.get("/auth/me", async (_req, res): Promise<void> => {
-  res.json({ status: "authenticated" });
-});
+router.post("/auth/signup", handleSignup);
+router.post("/api/auth/signup", handleSignup);
 
-// POST /auth/logout
-router.post("/auth/logout", async (_req, res): Promise<void> => {
-  res.json({ success: true });
-});
+router.post("/auth/login", handleLogin);
+router.post("/api/auth/login", handleLogin);
+
+router.get("/auth/me", (_req, res) => { res.json({ status: "authenticated" }); });
+router.get("/api/auth/me", (_req, res) => { res.json({ status: "authenticated" }); });
+
+router.post("/auth/logout", (_req, res) => { res.json({ success: true }); });
+router.post("/api/auth/logout", (_req, res) => { res.json({ success: true }); });
 
 export default router;

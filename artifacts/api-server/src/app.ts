@@ -32,4 +32,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", router);
 app.use("/", router);
 
+app.use((req, res) => {
+  res.status(404).json({ error: `API route ${req.method} ${req.url} not found` });
+});
+
 export default app;
