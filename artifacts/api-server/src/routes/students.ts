@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from "express";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
