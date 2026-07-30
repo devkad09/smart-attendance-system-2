@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, ScanFace, FileSpreadsheet, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Users, ScanFace, FileSpreadsheet, LogOut, Menu, X, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHealthCheck } from "@workspace/api-client-react";
+import { useAuth } from "@/hooks/use-auth";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -15,6 +16,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: health } = useHealthCheck();
+  const { user, logout } = useAuth();
   const isHealthy = health?.status === "ok";
 
   // Close mobile sidebar on route change
@@ -74,7 +76,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </div>
             <div>
               <span className="font-bold text-sm tracking-wide block leading-none">SmartAccess</span>
-              <span className="text-[10px] text-sidebar-foreground/60 uppercase tracking-widest block mt-1 leading-none">Control Room</span>
+              <span className="text-[10px] text-sidebar-foreground/60 uppercase tracking-widest block mt-1 leading-none">Lecturer Portal</span>
             </div>
           </div>
 
@@ -117,9 +119,25 @@ export function Shell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-sidebar-border/50 shrink-0">
-          <button className="flex w-full items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors">
-            <LogOut className="w-4 h-4" />
+        {/* User Info & Sign Out Footer */}
+        <div className="p-4 border-t border-sidebar-border/50 shrink-0 space-y-3">
+          {user && (
+            <div className="flex items-center gap-3 px-2 py-1.5 rounded-md bg-sidebar-accent/40 text-sidebar-foreground">
+              <div className="p-2 rounded-full bg-primary/10 text-primary shrink-0">
+                <UserCheck className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold truncate leading-none">{user.name}</p>
+                <p className="text-[11px] text-sidebar-foreground/60 truncate mt-0.5">{user.department}</p>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={logout}
+            className="flex w-full items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
             Sign Out
           </button>
         </div>

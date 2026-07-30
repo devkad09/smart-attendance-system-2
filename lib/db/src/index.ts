@@ -4,6 +4,7 @@ import * as schema from "./schema";
 import { studentsTable } from "./schema/students";
 import { attendanceTable } from "./schema/attendance";
 import { webAuthnCredentialsTable } from "./schema/webauthn";
+import { lecturersTable } from "./schema/lecturers";
 import fs from "fs";
 import path from "path";
 
@@ -70,6 +71,26 @@ const memoryCredentials: Array<{
   createdAt: Date;
 }> = [];
 
+let lecturerIdSeq = 2;
+const memoryLecturers: Array<{
+  id: number;
+  email: string;
+  passwordHash: string;
+  name: string;
+  department: string;
+  createdAt: Date;
+}> = [
+  {
+    id: 1,
+    email: "lecturer@university.edu",
+    // simple hash for "password123"
+    passwordHash: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+    name: "Dr. Sarah Jenkins",
+    department: "Computer Science",
+    createdAt: new Date(),
+  },
+];
+
 function createInMemoryDb() {
   return {
     select: () => ({
@@ -78,6 +99,7 @@ function createInMemoryDb() {
         if (table === studentsTable) items = [...memoryStudents];
         else if (table === attendanceTable) items = [...memoryAttendance];
         else if (table === webAuthnCredentialsTable) items = [...memoryCredentials];
+        else if (table === lecturersTable) items = [...memoryLecturers];
 
         const queryObj: any = {
           where: (condition: any) => {
@@ -141,6 +163,16 @@ function createInMemoryDb() {
             createdAt: new Date(),
           };
           memoryCredentials.push(insertedItem);
+        } else if (table === lecturersTable) {
+          insertedItem = {
+            id: lecturerIdSeq++,
+            email: valObj.email,
+            passwordHash: valObj.passwordHash,
+            name: valObj.name,
+            department: valObj.department ?? "Computer Science",
+            createdAt: new Date(),
+          };
+          memoryLecturers.push(insertedItem);
         }
 
         const resObj: any = Promise.resolve([insertedItem]);

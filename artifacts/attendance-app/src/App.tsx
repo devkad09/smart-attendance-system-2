@@ -8,6 +8,8 @@ import Dashboard from "@/pages/Dashboard";
 import Students from "@/pages/Students";
 import ScanSimulator from "@/pages/ScanSimulator";
 import Reports from "@/pages/Reports";
+import AuthPage from "@/pages/Auth";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,29 +29,45 @@ function NotFound() {
   );
 }
 
-function Router() {
+function MainApp() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
+
   return (
-    <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/students" component={Students} />
-      <Route path="/scan" component={ScanSimulator} />
-      <Route path="/reports" component={Reports} />
-      <Route component={NotFound} />
-    </Switch>
+    <Shell>
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/students" component={Students} />
+        <Route path="/scan" component={ScanSimulator} />
+        <Route path="/reports" component={Reports} />
+        <Route component={NotFound} />
+      </Switch>
+    </Shell>
   );
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Shell>
-            <Router />
-          </Shell>
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <MainApp />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
