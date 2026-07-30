@@ -1,8 +1,6 @@
-// @ts-nocheck
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import app from "../artifacts/api-server/src/app.js";
+import app from "../artifacts/api-server/dist/app.mjs";
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req, res) {
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
@@ -14,18 +12,16 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  // Preserve request URL path when rewritten by Vercel
   const rawUrl = req.url || "/";
   if (rawUrl.startsWith("/api/index") || rawUrl === "/api" || rawUrl === "/api/") {
     const matchedPath =
-      (req.headers["x-matched-path"] as string) ||
-      (req.headers["x-forwarded-uri"] as string) ||
-      (req.headers["x-rewrite-url"] as string);
+      req.headers["x-matched-path"] ||
+      req.headers["x-forwarded-uri"] ||
+      req.headers["x-rewrite-url"];
     if (matchedPath && typeof matchedPath === "string") {
       req.url = matchedPath;
     }
   }
 
-  const expressApp = app as unknown as (req: VercelRequest, res: VercelResponse) => void;
-  return expressApp(req, res);
+  return app(req, res);
 }
