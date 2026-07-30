@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "name": "smart-attendance-system-2",
   "buildCommand": "pnpm run build",
   "outputDirectory": "artifacts/attendance-app/dist/public",
   "rewrites": [

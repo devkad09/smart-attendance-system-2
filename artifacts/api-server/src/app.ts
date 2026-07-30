@@ -1,36 +1,36 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
-import router from "./routes";
-import { logger } from "./lib/logger";
+import router from "./routes/index.js";
+import { logger } from "./lib/logger.js";
 
 const app: Express = express();
 
-app.use(
-  pinoHttp({
-    logger,
-    serializers: {
-      req(req) {
-        return {
-          id: req.id,
-          method: req.method,
-          url: req.url?.split("?")[0],
-        };
-      },
-      res(res) {
-        return {
-          statusCode: res.statusCode,
-        };
-      },
+const pinoMiddleware = (pinoHttp as any)({
+  logger,
+  serializers: {
+    req(req: any) {
+      return {
+        id: req.id,
+        method: req.method,
+        url: req.url?.split("?")[0],
+      };
     },
-  }),
-);
+    res(res: any) {
+      return {
+        statusCode: res.statusCode,
+      };
+    },
+  },
+});
+
+app.use(pinoMiddleware);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Body normalization middleware for serverless runtimes
-app.use((req, _res, next) => {
+app.use((req: any, _res: any, next: any) => {
   if (typeof req.body === "string" && req.body.trim()) {
     try {
       req.body = JSON.parse(req.body);
@@ -46,7 +46,7 @@ app.use((req, _res, next) => {
 app.use("/api", router);
 app.use("/", router);
 
-app.use((req, res) => {
+app.use((req: any, res: any) => {
   res.status(404).json({ error: `API route ${req.method} ${req.url} not found` });
 });
 
