@@ -9,7 +9,19 @@ function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password + "smart_attendance_salt_2026").digest("hex");
 }
 
-function validateSignup(body: any): { valid: true; data: { email: string; password: string; name: string; department: string } } | { valid: false; error: string } {
+function parseBody(body: any): any {
+  if (!body) return {};
+  if (typeof body === "string") {
+    try { return JSON.parse(body); } catch { return {}; }
+  }
+  if (Buffer.isBuffer(body)) {
+    try { return JSON.parse(body.toString("utf-8")); } catch { return {}; }
+  }
+  return body;
+}
+
+function validateSignup(rawBody: any): { valid: true; data: { email: string; password: string; name: string; department: string } } | { valid: false; error: string } {
+  const body = parseBody(rawBody);
   if (!body || typeof body !== "object") return { valid: false, error: "Invalid request payload" };
   const { email, password, name, department } = body;
   if (!email || typeof email !== "string" || !email.includes("@")) return { valid: false, error: "Please provide a valid institutional email address." };
@@ -20,7 +32,8 @@ function validateSignup(body: any): { valid: true; data: { email: string; passwo
   return { valid: true, data: { email: email.trim(), password, name: name.trim(), department: department.trim() } };
 }
 
-function validateLogin(body: any): { valid: true; data: { email: string; password: string } } | { valid: false; error: string } {
+function validateLogin(rawBody: any): { valid: true; data: { email: string; password: string } } | { valid: false; error: string } {
+  const body = parseBody(rawBody);
   if (!body || typeof body !== "object") return { valid: false, error: "Invalid request payload" };
   const { email, password } = body;
   if (!email || typeof email !== "string") return { valid: false, error: "Email is required." };
