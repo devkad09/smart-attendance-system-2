@@ -12,5 +12,6 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
-  return app(req, res);
+  const handler = app as unknown as (req: VercelRequest, res: VercelResponse) => void;
+  return handler(req, res);
 }
