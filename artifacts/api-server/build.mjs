@@ -21,11 +21,14 @@ async function buildAll() {
     ],
     platform: "node",
     bundle: true,
-    packages: "external",
     format: "esm",
     outdir: distDir,
     outExtension: { ".js": ".mjs" },
     logLevel: "info",
+    alias: {
+      "@workspace/db": path.resolve(artifactDir, "../../lib/db/src/index.ts"),
+      "@workspace/api-zod": path.resolve(artifactDir, "../../lib/api-zod/src/index.ts"),
+    },
     // Some packages may not be bundleable, so we externalize them, we can add more here as needed.
     // Some of the packages below may not be imported or installed, but we're adding them in case they are in the future.
     // Examples of unbundleable packages:
