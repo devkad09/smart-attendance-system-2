@@ -101,6 +101,7 @@ export default function Students() {
   const [viewStudentId, setViewStudentId] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const canUseWebAuthn = typeof window !== "undefined" && window.isSecureContext && "PublicKeyCredential" in window;
 
   const { data: students, isLoading } = useListStudents();
   const enrollMutation = useEnrollStudent();
@@ -199,11 +200,20 @@ export default function Students() {
     enrollMutation.mutate({ data: values }, {
       onSuccess: (newStudent) => {
         queryClient.invalidateQueries({ queryKey: getListStudentsQueryKey() });
-        toast({
-          title: "Student Created! Scanning Face ID...",
-          description: `Starting Face ID scan for ${values.name}...`,
-        });
-        registerFaceIdForStudent(newStudent.id, newStudent.name, true);
+        if (canUseWebAuthn) {
+          toast({
+            title: "Student Created! Scanning Face ID...",
+            description: `Starting Face ID scan for ${values.name}...`,
+          });
+          registerFaceIdForStudent(newStudent.id, newStudent.name, true);
+        } else {
+          toast({
+            title: "Student Created",
+            description: "Face ID registration is unavailable on this device or connection. You can register it later from a secure browser.",
+          });
+          setIsEnrollOpen(false);
+          form.reset();
+        }
       },
       onError: (error: any) => {
         toast({
@@ -296,7 +306,7 @@ export default function Students() {
                   <Button type="button" variant="outline" onClick={() => setIsEnrollOpen(false)}>Cancel</Button>
                   <Button type="submit" disabled={enrollMutation.isPending || isScanningFace} className="gap-2">
                     <ScanFace className="w-4 h-4" />
-                    {enrollMutation.isPending ? "Saving..." : isScanningFace ? "Scanning Face ID..." : "Save & Register Face ID"}
+                    {enrollMutation.isPending ? "Saving..." : isScanningFace ? "Scanning Face ID..." : canUseWebAuthn ? "Save & Register Face ID" : "Save Student"}
                   </Button>
                 </div>
               </form>
