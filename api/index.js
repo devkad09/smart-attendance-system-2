@@ -90,13 +90,34 @@ async function parseBody(req) {
   if (!req || typeof req.on !== "function") {
     return {};
   }
+  if (req.readableEnded || req.complete) {
+    return {};
+  }
 
-  const text = await new Promise((resolve) => {
-    const chunks = [];
-    req.on("data", (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk))));
-    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
-    req.on("error", () => resolve(""));
-  });
+  const text = await Promise.race([
+    new Promise((resolve) => {
+      const chunks = [];
+      const onData = (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+      const onEnd = () => {
+        cleanup();
+        resolve(Buffer.concat(chunks).toString("utf-8"));
+      };
+      const onError = () => {
+        cleanup();
+        resolve("");
+      };
+      const cleanup = () => {
+        req.off("data", onData);
+        req.off("end", onEnd);
+        req.off("error", onError);
+      };
+
+      req.on("data", onData);
+      req.on("end", onEnd);
+      req.on("error", onError);
+    }),
+    new Promise((resolve) => setTimeout(() => resolve(""), 150)),
+  ]);
   if (!text.trim()) return {};
   try {
     return JSON.parse(text);
