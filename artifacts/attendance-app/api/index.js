@@ -8,6 +8,7 @@ async function getApp() {
 }
 
 export default async function handler(req, res) {
+  res.setHeader("x-smartaccess-api", "attendance-app-handler");
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
