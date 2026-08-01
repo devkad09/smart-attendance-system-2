@@ -65,10 +65,38 @@ async function parseBody(req) {
       return {};
     }
   }
+  if (Buffer.isBuffer(req.body)) {
+    try {
+      return JSON.parse(req.body.toString("utf-8"));
+    } catch {
+      return {};
+    }
+  }
+  if (typeof req.rawBody === "string") {
+    try {
+      return JSON.parse(req.rawBody);
+    } catch {
+      return {};
+    }
+  }
+  if (Buffer.isBuffer(req.rawBody)) {
+    try {
+      return JSON.parse(req.rawBody.toString("utf-8"));
+    } catch {
+      return {};
+    }
+  }
 
-  const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
-  const text = Buffer.concat(chunks).toString("utf-8");
+  if (!req || typeof req.on !== "function") {
+    return {};
+  }
+
+  const text = await new Promise((resolve) => {
+    const chunks = [];
+    req.on("data", (chunk) => chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk))));
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+    req.on("error", () => resolve(""));
+  });
   if (!text.trim()) return {};
   try {
     return JSON.parse(text);
