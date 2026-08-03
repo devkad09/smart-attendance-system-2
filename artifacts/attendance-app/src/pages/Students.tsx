@@ -182,9 +182,10 @@ export default function Students() {
         },
         onError: (err: any) => {
           setIsScanningFace(false);
+          const msg = typeof err?.error === "string" ? err.error : typeof err?.message === "string" ? err.message : err?.error?.error || "Could not fetch WebAuthn registration options.";
           toast({
             title: "Registration Failed",
-            description: err?.error || "Could not fetch WebAuthn registration options.",
+            description: msg,
             variant: "destructive",
           });
           if (closeDialog) {

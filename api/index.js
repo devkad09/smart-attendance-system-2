@@ -271,15 +271,15 @@ async function handleFallback(req, res, pathName) {
 
   if (method === "POST" && pathName === "/api/webauthn/register-options") {
     const body = await parseBody(req);
-    const studentId = Number(body.studentId);
+    const studentId = Number(body.studentId) || 1;
     const student = students.find((s) => s.id === studentId);
     const rpID = req.headers.host ? req.headers.host.split(":")[0] : "localhost";
     return sendJson(res, 200, {
       rp: { name: "SmartAccess", id: rpID },
       user: {
         id: Buffer.from(String(studentId)).toString("base64url"),
-        name: student ? student.studentId : "STU-000",
-        displayName: student ? student.name : "Student",
+        name: student ? student.studentId : `STU-00${studentId}`,
+        displayName: student ? student.name : "Enrolled Student",
       },
       challenge: crypto.randomBytes(32).toString("base64url"),
       pubKeyCredParams: [{ alg: -7, type: "public-key" }, { alg: -257, type: "public-key" }],
