@@ -101,39 +101,35 @@ function createInMemoryDb() {
         else if (table === attendanceTable) items = [...memoryAttendance];
         else if (table === webAuthnCredentialsTable) items = [...memoryCredentials];
         else if (table === lecturersTable) items = [...memoryLecturers];
+        const queryObj: any = Promise.resolve([...items]);
+        queryObj.where = (condition: any) => {
+          let filtered = [...items];
+          if (condition) {
+            let colName = condition.colName;
+            let val = condition.val;
 
-        const queryObj: any = {
-          where: (condition: any) => {
-            let filtered = [...items];
-            if (condition) {
-              let colName = condition.colName;
-              let val = condition.val;
-
-              if (!colName && condition.queryChunks) {
-                for (const chunk of condition.queryChunks) {
-                  if (chunk && typeof chunk === "object" && "name" in chunk) colName = chunk.name;
-                  if (chunk && typeof chunk === "object" && "value" in chunk && chunk.value !== undefined) val = chunk.value;
-                }
-              }
-              if (!colName && condition.config) {
-                colName = condition.config.left?.name || condition.config.colName;
-                val = condition.config.right?.value !== undefined ? condition.config.right.value : condition.config.val;
-              }
-
-              if (colName && val !== undefined) {
-                filtered = filtered.filter((item) => String((item as any)[colName] || "").toLowerCase() === String(val).toLowerCase());
-              } else if (condition.op === "eq") {
-                filtered = filtered.filter((item) => (item as any)[condition.colName] === condition.val);
+            if (!colName && condition.queryChunks) {
+              for (const chunk of condition.queryChunks) {
+                if (chunk && typeof chunk === "object" && "name" in chunk) colName = chunk.name;
+                if (chunk && typeof chunk === "object" && "value" in chunk && chunk.value !== undefined) val = chunk.value;
               }
             }
-            const resObj: any = filtered;
-            resObj.orderBy = (col?: any) => Promise.resolve(filtered);
-            resObj.then = (resolve: any, reject: any) => Promise.resolve(filtered).then(resolve, reject);
-            return resObj;
-          },
-          orderBy: (col?: any) => Promise.resolve(items),
-          then: (resolve: any, reject: any) => Promise.resolve(items).then(resolve, reject),
+            if (!colName && condition.config) {
+              colName = condition.config.left?.name || condition.config.colName;
+              val = condition.config.right?.value !== undefined ? condition.config.right.value : condition.config.val;
+            }
+
+            if (colName && val !== undefined) {
+              filtered = filtered.filter((item) => String((item as any)[colName] || "").toLowerCase() === String(val).toLowerCase());
+            } else if (condition.op === "eq") {
+              filtered = filtered.filter((item) => (item as any)[condition.colName] === condition.val);
+            }
+          }
+          const wherePromise: any = Promise.resolve(filtered);
+          wherePromise.orderBy = (col?: any) => Promise.resolve(filtered);
+          return wherePromise;
         };
+        queryObj.orderBy = (col?: any) => Promise.resolve([...items]);
         return queryObj;
       },
     }),
