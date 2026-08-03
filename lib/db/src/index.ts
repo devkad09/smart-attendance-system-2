@@ -105,24 +105,37 @@ function createInMemoryDb() {
         queryObj.where = (condition: any) => {
           let filtered = [...items];
           if (condition) {
-            let colName = condition.colName;
-            let val = condition.val;
+            let colName: string | undefined = condition.colName || condition.key;
+            let val: any = condition.val !== undefined ? condition.val : condition.value;
+
+            if (condition.left) {
+              colName = condition.left.name || condition.left.key || condition.left.fieldName || colName;
+            }
+            if (condition.right) {
+              val = condition.right.value !== undefined ? condition.right.value : condition.right.val !== undefined ? condition.right.val : val;
+            }
+
+            if (condition.config) {
+              if (condition.config.left) colName = condition.config.left.name || condition.config.left.key || colName;
+              if (condition.config.right) val = condition.config.right.value !== undefined ? condition.config.right.value : val;
+            }
 
             if (!colName && condition.queryChunks) {
               for (const chunk of condition.queryChunks) {
-                if (chunk && typeof chunk === "object" && "name" in chunk) colName = chunk.name;
-                if (chunk && typeof chunk === "object" && "value" in chunk && chunk.value !== undefined) val = chunk.value;
+                if (chunk && typeof chunk === "object") {
+                  if ("name" in chunk) colName = chunk.name;
+                  if ("key" in chunk) colName = chunk.key;
+                  if ("value" in chunk && chunk.value !== undefined) val = chunk.value;
+                }
               }
-            }
-            if (!colName && condition.config) {
-              colName = condition.config.left?.name || condition.config.colName;
-              val = condition.config.right?.value !== undefined ? condition.config.right.value : condition.config.val;
             }
 
             if (colName && val !== undefined) {
-              filtered = filtered.filter((item) => String((item as any)[colName] || "").toLowerCase() === String(val).toLowerCase());
-            } else if (condition.op === "eq") {
-              filtered = filtered.filter((item) => (item as any)[condition.colName] === condition.val);
+              const camelProp = colName.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+              filtered = filtered.filter((item) => {
+                const itemVal = (item as any)[camelProp] ?? (item as any)[colName!];
+                return String(itemVal || "").toLowerCase() === String(val).toLowerCase();
+              });
             }
           }
           const wherePromise: any = Promise.resolve(filtered);
