@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
-import expressApp from "../artifacts/api-server/dist/app.mjs";
 
-let backendUnavailable = false;
+let expressAppPromise = null;
 
 const lecturers = [
   {
@@ -309,16 +308,22 @@ export default async function handler(req, res) {
 
   const pathName = normalizePath(req);
 
-  if (backendUnavailable) {
-    return handleFallback(req, res, pathName);
+  try {
+    if (!expressAppPromise) {
+      expressAppPromise = import("../artifacts/api-server/dist/app.mjs")
+        .then((m) => m.default || m)
+        .catch((err) => {
+          console.warn("Could not load express app bundle, using native handler:", err);
+          return null;
+        });
+    }
+    const app = await expressAppPromise;
+    if (app && typeof app === "function") {
+      return app(req, res);
+    }
+  } catch (err) {
+    console.error("Express handler error, delegating to native handler:", err);
   }
 
-  try {
-    const app = expressApp.default || expressApp;
-    return app(req, res);
-  } catch (err) {
-    console.error("Failed to execute serverless app handler. Switching to fallback mode.", err);
-    backendUnavailable = true;
-    return handleFallback(req, res, pathName);
-  }
+  return handleFallback(req, res, pathName);
 }
