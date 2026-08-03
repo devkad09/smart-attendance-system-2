@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
+import expressApp from "../artifacts/api-server/dist/app.mjs";
 
-let appPromise = null;
 let backendUnavailable = false;
 
 const lecturers = [
@@ -57,7 +57,7 @@ function normalizePath(req) {
 }
 
 async function parseBody(req) {
-  if (req.body && typeof req.body === "object") return req.body;
+  if (req.body && typeof req.body === "object" && Object.keys(req.body).length > 0) return req.body;
   if (typeof req.body === "string") {
     try {
       return JSON.parse(req.body);
@@ -293,13 +293,6 @@ async function handleFallback(req, res, pathName) {
   return sendJson(res, 404, { error: `API route ${method} ${pathName} not found` });
 }
 
-async function getApp() {
-  if (!appPromise && !backendUnavailable) {
-    appPromise = import("../artifacts/api-server/dist/app.mjs").then((m) => m.default || m);
-  }
-  return appPromise;
-}
-
 export default async function handler(req, res) {
   res.setHeader("x-smartaccess-api", "root-handler");
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -321,12 +314,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const app = await getApp();
+    const app = expressApp.default || expressApp;
     return app(req, res);
   } catch (err) {
-    console.error("Failed to load serverless app handler. Switching to fallback mode.", err);
+    console.error("Failed to execute serverless app handler. Switching to fallback mode.", err);
     backendUnavailable = true;
-    appPromise = null;
     return handleFallback(req, res, pathName);
   }
 }

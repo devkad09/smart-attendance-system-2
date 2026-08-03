@@ -19,6 +19,20 @@ const STORAGE_KEY = "smart_access_lecturer_user";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function extractErrorMessage(data: any, defaultMsg: string): string {
+  if (!data) return defaultMsg;
+  if (typeof data.error === "string" && data.error.trim()) return data.error;
+  if (typeof data.message === "string" && data.message.trim()) return data.message;
+  if (data.error && typeof data.error === "object") {
+    if (typeof data.error.message === "string" && data.error.message.trim()) return data.error.message;
+    try {
+      return JSON.stringify(data.error);
+    } catch {}
+  }
+  if (typeof data === "string" && data.trim()) return data;
+  return defaultMsg;
+}
+
 async function parseResponse(res: Response): Promise<any> {
   const text = await res.text();
   if (!text || text.trim() === "") {
@@ -58,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const data = await parseResponse(res);
     if (!res.ok) {
-      throw new Error(data.error || `Login failed (${res.status})`);
+      throw new Error(extractErrorMessage(data, `Login failed (${res.status})`));
     }
 
     const lecturer: LecturerUser = data;
@@ -86,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const data = await parseResponse(res);
     if (!res.ok) {
-      throw new Error(data.error || `Signup failed (${res.status})`);
+      throw new Error(extractErrorMessage(data, `Signup failed (${res.status})`));
     }
 
     const lecturer: LecturerUser = data;
