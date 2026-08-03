@@ -200,25 +200,20 @@ export default function Students() {
     enrollMutation.mutate({ data: values }, {
       onSuccess: (newStudent) => {
         queryClient.invalidateQueries({ queryKey: getListStudentsQueryKey() });
+        setIsEnrollOpen(false);
+        form.reset();
+        toast({
+          title: "Student Enrolled! 🎉",
+          description: `${values.name} (${values.studentId}) was enrolled successfully.`,
+        });
         if (canUseWebAuthn) {
-          toast({
-            title: "Student Created! Scanning Face ID...",
-            description: `Starting Face ID scan for ${values.name}...`,
-          });
-          registerFaceIdForStudent(newStudent.id, newStudent.name, true);
-        } else {
-          toast({
-            title: "Student Created",
-            description: "Face ID registration is unavailable on this device or connection. You can register it later from a secure browser.",
-          });
-          setIsEnrollOpen(false);
-          form.reset();
+          registerFaceIdForStudent(newStudent.id, newStudent.name, false);
         }
       },
       onError: (error: any) => {
         toast({
           title: "Enrollment Failed",
-          description: error?.response?.data?.error || error?.message || "An unknown error occurred.",
+          description: error?.response?.data?.error || error?.error || error?.message || "An unknown error occurred.",
           variant: "destructive",
         });
       }
